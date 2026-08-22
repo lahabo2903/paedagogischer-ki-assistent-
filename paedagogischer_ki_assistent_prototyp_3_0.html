@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f8fc">
+<title>Pädagogischer KI-Assistent – Prototyp 3.0</title>
+<style>
+:root{
+  --blue:#2467c7; --blue2:#174f9d; --ink:#17233a; --muted:#6d7788;
+  --bg:#f5f7fb; --card:#fff; --line:#e5e9f0; --green:#18885a;
+  --purple:#7a4cc2; --orange:#c97817; --teal:#177f88; --shadow:0 10px 30px rgba(20,40,80,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+button,input,textarea{font:inherit}
+.app{max-width:540px;min-height:100dvh;margin:auto;background:var(--bg);padding-bottom:92px}
+.top{position:sticky;top:0;z-index:5;background:rgba(245,247,251,.92);backdrop-filter:blur(14px);padding:calc(env(safe-area-inset-top) + 12px) 18px 12px;border-bottom:1px solid rgba(229,233,240,.7)}
+.toprow{display:flex;align-items:center;gap:12px}.top h1{font-size:19px;margin:0;font-weight:750;letter-spacing:-.2px}.top .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.back{width:38px;height:38px;border:0;border-radius:12px;background:#fff;color:var(--ink);font-size:24px;line-height:1}
+.page{padding:18px;display:none}.page.active{display:block;animation:in .22s ease-out}@keyframes in{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 8px}.card h3{font-size:14px;margin:0 0 9px}.muted{color:var(--muted)}.small{font-size:12px}.center{text-align:center}
+.primary,.secondary,.danger{border:0;border-radius:15px;padding:15px 16px;font-weight:700;width:100%;cursor:pointer}
+.primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 8px 18px rgba(36,103,199,.22)}
+.secondary{background:#fff;color:var(--blue2);border:1px solid #ccd8eb}.danger{background:#fff0f0;color:#b33}
+.hero{padding:24px 18px}.hero h2{font-size:22px;margin-bottom:5px}.hero p{margin:0;color:var(--muted);font-size:14px}
+.big-action{margin:18px 0;background:linear-gradient(135deg,#2b74d4,#164b95);border-radius:22px;color:#fff;padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 28px rgba(36,103,199,.22);cursor:pointer}
+.big-action .mic{width:48px;height:48px;border-radius:16px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:26px}.big-action b{font-size:17px}.big-action span{font-size:12px;opacity:.82}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.activity{padding:13px 0;border-bottom:1px solid var(--line)}.activity:last-child{border-bottom:0}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#e9f0fb;font-size:20px;flex:none}
+.listitem{display:flex;align-items:center;gap:12px;padding:14px 2px;border-bottom:1px solid var(--line);cursor:pointer}.listitem:last-child{border-bottom:0}.listitem b{font-size:15px}.listitem span{font-size:12px;color:var(--muted)}
+.search{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;outline:none;margin-bottom:12px}
+.profile{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px}.profile .bigavatar{width:76px;height:76px;border-radius:50%;background:#e9f0fb;display:grid;place-items:center;font-size:38px;border:4px solid #fff;box-shadow:0 0 0 1px var(--line)}.profile h2{margin:9px 0 2px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}.tag{padding:9px 11px;border-radius:999px;background:#f2f5fa;font-size:12px}.tag.teal{background:#eaf8f7;color:var(--teal)}.tag.green{background:#ecf8f1;color:var(--green)}.tag.purple{background:#f3effb;color:var(--purple)}.tag.orange{background:#fff4e7;color:var(--orange)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.stat{padding:13px;border-radius:15px;background:#f7f9fc}.stat b{display:block;font-size:19px}.stat span{font-size:11px;color:var(--muted)}
+.choice{display:flex;align-items:center;gap:13px;padding:18px;border:1px solid var(--line);background:#fff;border-radius:18px;margin-bottom:12px;cursor:pointer}.choice .ico{font-size:26px;width:42px;text-align:center}.choice b{display:block}.choice span{font-size:12px;color:var(--muted)}
+textarea{width:100%;min-height:180px;border:1px solid var(--line);border-radius:18px;padding:15px;resize:vertical;outline:none;background:#fff;line-height:1.55}
+.progress{height:4px;background:#e3e8f2;border-radius:9px;overflow:hidden;margin:10px 0 22px}.progress i{display:block;width:62%;height:100%;background:var(--blue);border-radius:9px}
+.analysis-intro{padding:4px 4px 14px}.cat{display:flex;align-items:center;justify-content:space-between;padding:14px;border:1px solid var(--line);border-radius:15px;background:#fff;margin:9px 0}.cat .left{display:flex;align-items:center;gap:10px}.count{font-size:11px;color:var(--muted);background:#f3f5f8;padding:5px 8px;border-radius:999px}
+.insight{padding:15px;border-radius:17px;margin:10px 0;border:1px solid var(--line);background:#fff}.insight .label{font-size:12px;font-weight:750;margin-bottom:5px}.insight p{margin:0;font-size:14px;line-height:1.45}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:14px}.tab{padding:10px 4px;text-align:center;border-radius:12px;font-size:11px;color:var(--muted);border:1px solid transparent;cursor:pointer}.tab.active{background:#eaf1fb;color:var(--blue2);border-color:#d8e5f7;font-weight:700}
+.tabpanel{display:none}.tabpanel.active{display:block}.timeline{position:relative;padding-left:20px}.timeline:before{content:"";position:absolute;left:5px;top:7px;bottom:7px;width:2px;background:#dce5f1}.event{position:relative;padding:0 0 17px 10px}.event:before{content:"";position:absolute;left:-18px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px #eaf1fb}.event b{font-size:13px}.event p{margin:4px 0 0;font-size:13px;color:#465268;line-height:1.4}
+.savecheck{width:82px;height:82px;border-radius:50%;background:#e7f7ef;color:var(--green);display:grid;place-items:center;font-size:42px;margin:32px auto 18px}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:10;width:min(540px,100%);padding:10px 18px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.93);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:6px;font-size:10px}.nav button.active{color:var(--blue2);font-weight:700}.nav .nicon{display:block;font-size:18px;margin-bottom:2px}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(120px);bottom:92px;background:#17233a;color:#fff;padding:12px 16px;border-radius:999px;font-size:13px;z-index:30;transition:.25s;box-shadow:var(--shadow)}.toast.show{transform:translateX(-50%) translateY(0)}
+.loader{width:68px;height:68px;border:6px solid #e5edf9;border-top-color:var(--blue);border-radius:50%;margin:40px auto 20px;animation:spin .9s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.wave{height:42px;margin:14px 0;background:repeating-linear-gradient(90deg,transparent 0 4px,#8fb3e9 4px 6px,transparent 6px 10px);mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);opacity:.8}
+.note{padding:12px 13px;border-radius:14px;background:#eef4fd;color:#526177;font-size:12px;line-height:1.45}
+.hidden{display:none!important}
+@media(min-width:600px){body{background:#e9edf5}.app{box-shadow:0 0 0 1px #dde3ed,0 20px 60px rgba(23,35,58,.12)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top"><div class="toprow"><button class="back hidden" id="backBtn" onclick="goBack()">‹</button><div><h1 id="title">Pädagogischer KI-Assistent</h1><div class="sub" id="subtitle">Einmal beobachten. Alles dokumentieren.</div></div></div></header>
+
+  <main>
+    <section class="page active" id="home">
+      <div class="card hero"><h2>Guten Morgen! 👋</h2><p>Hier ist dein Überblick für heute.</p></div>
+      <div class="big-action" onclick="showPage('observe')"><div class="mic">🎤</div><div><b>Neue Beobachtung</b><br><span>Sprache oder Text</span></div></div>
+      <div class="card"><div class="row"><h3>Letzte Aktivitäten</h3><span class="small muted">Alle anzeigen</span></div>
+        <div class="activity row"><div class="row" style="justify-content:flex-start"><div class="avatar">👦</div><div><b>Paul Müller</b><br><span class="small muted">Heute, 08:47 · Beobachtung</span></div></div></div>
+        <div class="activity row"><div class="row" style="justify-content:flex-start"><div class="avatar">👧</div><div><b>Emma Schneider</b><br><span class="small muted">Gestern · Gesprächsnotiz</span></div></div></div>
+        <div class="activity row"><div class="row" style="justify-content:flex-start"><div class="avatar">👦</div><div><b>Max Weber</b><br><span class="small muted">20.08. · Förderplan aktualisiert</span></div></div></div>
+      </div>
+    </section>
+
+    <section class="page" id="students">
+      <input class="search" id="studentSearch" placeholder="🔎  Schüler suchen..." oninput="filterStudents()">
+      <div class="card" id="studentList"></div>
+      <button class="secondary" onclick="toast('Schüler anlegen ist im nächsten MVP vorgesehen.')">＋ Schüler anlegen</button>
+    </section>
+
+    <section class="page" id="profile">
+      <div class="card"><div class="profile"><div class="bigavatar" id="profileAvatar">👦</div><h2 id="profileName">Paul Müller</h2><div class="muted small" id="profileClass">Klasse 3a</div></div>
+        <h3 style="margin-top:18px">Förderbereiche</h3><div class="tags" id="profileTags"></div>
+        <div class="stats"><div class="stat"><b id="obsCount">36</b><span>Beobachtungen</span></div><div class="stat"><b>Heute</b><span>Letzte Beobachtung</span></div></div>
+      </div>
+      <button class="primary" onclick="showPage('observe')">＋ Beobachtung aufnehmen</button>
+      <div class="card" style="margin-top:14px"><div class="row"><h3>Schülerchronik</h3><span class="small muted">Neueste zuerst</span></div><div class="timeline" id="timeline"></div></div>
+    </section>
+
+    <section class="page" id="observe">
+      <div class="progress"><i></i></div>
+      <div class="analysis-intro"><h2>Neue Beobachtung</h2><p class="muted">Wie möchtest du die Beobachtung erfassen?</p></div>
+      <div class="choice" onclick="showPage('voice')"><div class="ico">🎤</div><div><b>Spracheingabe</b><span>Beobachtung frei erzählen</span></div></div>
+      <div class="choice" onclick="showPage('review')"><div class="ico">⌨️</div><div><b>Texteingabe</b><span>Beobachtung direkt schreiben</span></div></div>
+      <div class="note">✨ Die KI erkennt später automatisch pädagogisch relevante Informationen und ordnet sie passenden Bereichen zu.</div>
+    </section>
+
+    <section class="page" id="voice">
+      <div class="center"><div style="font-size:72px;margin-top:28px">🎙️</div><h2>Spracheingabe</h2><p class="muted">Sprich einfach, was du beobachtet hast.</p><div class="wave"></div><div id="voiceTime" style="font-size:24px;font-weight:750">00:00</div><p class="small muted">Simulation im Prototyp 3.0</p></div>
+      <button class="primary" id="voiceBtn" onclick="toggleVoice()">Aufnahme starten</button>
+      <button class="secondary" style="margin-top:10px" onclick="useDemoVoice()">Demo-Beobachtung verwenden</button>
+    </section>
+
+    <section class="page" id="review">
+      <div class="progress"><i style="width:78%"></i></div><h2>Beobachtung prüfen</h2><p class="muted small">Ist der Text richtig verstanden?</p>
+      <textarea id="observationText">Paul hat heute erstmals selbstständig seinen Talker genutzt. Im Morgenkreis benötigte er noch Unterstützung.</textarea>
+      <button class="primary" style="margin-top:12px" onclick="runAnalysis()">Weiter zur KI-Auswertung</button>
+    </section>
+
+    <section class="page" id="analyzing">
+      <div class="loader"></div><h2 class="center">Die KI analysiert die Beobachtung …</h2><p class="center muted">Relevante pädagogische Informationen werden erkannt und strukturiert.</p>
+    </section>
+
+    <section class="page" id="analysis">
+      <div class="analysis-intro"><h2>Das hat die KI erkannt</h2><p class="muted">Die Beobachtung enthält relevante Hinweise in folgenden Bereichen.</p></div>
+      <div id="categoryList"></div>
+      <button class="primary" onclick="showPage('results')">Ergebnisse ansehen</button>
+    </section>
+
+    <section class="page" id="results">
+      <h2>KI-Ergebnisse</h2><p class="muted small">Die Informationen können später für verschiedene pädagogische Dokumente verwendet werden.</p>
+      <div class="tabs">
+        <div class="tab active" onclick="openTab('overview',this)">Übersicht</div>
+        <div class="tab" onclick="openTab('plan',this)">Förderplan</div>
+        <div class="tab" onclick="openTab('report',this)">Zeugnis</div>
+        <div class="tab" onclick="openTab('talk',this)">Gespräch</div>
+      </div>
+      <div class="tabpanel active" id="overview">
+        <div class="insight"><div class="label" style="color:var(--green)">● Entwicklungsfortschritt</div><p>Paul nutzt seinen Talker erstmals selbstständig.</p></div>
+        <div class="insight"><div class="label" style="color:var(--teal)">● Kommunikation</div><p>Zunehmend selbstständige Nutzung unterstützter Kommunikation.</p></div>
+        <div class="insight"><div class="label" style="color:var(--purple)">● Unterstützungsbedarf</div><p>Im Morgenkreis benötigt Paul weiterhin Unterstützung.</p></div>
+      </div>
+      <div class="tabpanel" id="plan"><div class="insight"><div class="label">Förderplan-Baustein</div><p>Paul soll die selbstständige Nutzung seines Talkers in unterschiedlichen Alltagssituationen weiter ausbauen. Im strukturierten Gruppensetting erhält er weiterhin gezielte Unterstützung.</p></div><div class="note"><b>Förderziel-Vorschlag:</b><br>Selbstständige Nutzung unterstützter Kommunikation in zunehmend unterschiedlichen Situationen.</div></div>
+      <div class="tabpanel" id="report"><div class="insight"><div class="label">Zeugnisrelevante Entwicklung</div><p>Paul nutzt seinen Talker zunehmend selbstständig zur Kommunikation und erweitert damit seine Möglichkeiten, eigene Anliegen auszudrücken.</p></div></div>
+      <div class="tabpanel" id="talk"><div class="insight"><div class="label">Für das Elterngespräch</div><p>Positiver Entwicklungsschritt: Paul hat seinen Talker erstmals selbstständig eingesetzt. Gleichzeitig besteht im Morgenkreis weiterhin Unterstützungsbedarf.</p></div></div>
+      <button class="primary" style="margin-top:14px" onclick="saveObservation()">Informationen speichern</button>
+      <button class="secondary" style="margin-top:10px" onclick="showPage('review')">Beobachtung bearbeiten</button>
+    </section>
+
+    <section class="page" id="saved">
+      <div class="savecheck">✓</div><h2 class="center">Beobachtung gespeichert!</h2><p class="center muted">Die pädagogischen Informationen wurden strukturiert in Pauls Chronik abgelegt.</p>
+      <div class="card"><h3>Jetzt verfügbar für</h3><div class="tags"><span class="tag teal">Förderplan</span><span class="tag green">Zeugnis</span><span class="tag purple">Elterngespräch</span><span class="tag orange">Entwicklungsverlauf</span></div></div>
+      <button class="primary" onclick="showPage('profile')">Zum Schülerprofil</button>
+      <button class="secondary" style="margin-top:10px" onclick="showPage('observe')">Weitere Beobachtung</button>
+      <button class="secondary" style="margin-top:10px" onclick="showPage('home')">Zur Startseite</button>
+    </section>
+  </main>
+
+  <nav class="nav">
+    <button data-nav="home" class="active" onclick="showPage('home')"><span class="nicon">⌂</span>Start</button>
+    <button data-nav="students" onclick="showPage('students')"><span class="nicon">♙</span>Schüler</button>
+    <button data-nav="profile" onclick="showPage('profile')"><span class="nicon">▤</span>Chronik</button>
+    <button onclick="toast('Weitere Bereiche kommen in einer späteren Version.')"><span class="nicon">☰</span>Mehr</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const students=[
+ {name:"Paul Müller",class:"Klasse 3a",avatar:"👦",areas:["Kommunikation","Selbstständigkeit","Soziale Kompetenz","Lernen / Kognition","Motorik"],count:36},
+ {name:"Emma Schneider",class:"Klasse 3a",avatar:"👧",areas:["Kommunikation","Soziale Kompetenz","Selbstständigkeit"],count:24},
+ {name:"Max Weber",class:"Klasse 3a",avatar:"👦",areas:["Lernen / Kognition","Motorik","Selbstständigkeit"],count:19},
+ {name:"Lena Hoffmann",class:"Klasse 3b",avatar:"👧",areas:["Kommunikation","Soziale Kompetenz"],count:31},
+ {name:"Jonas Krause",class:"Klasse 2a",avatar:"👦",areas:["Selbstständigkeit","Motorik"],count:14}
+];
+let current=JSON.parse(localStorage.getItem("pki_current"))||students[0];
+let savedObs=JSON.parse(localStorage.getItem("pki_obs"))||[];
+let history=["home"],voiceTimer=null,voiceSec=0;
+
+function setHeader(id){
+ const map={home:["Pädagogischer KI-Assistent","Einmal beobachten. Alles dokumentieren."],students:["Schüler","Schüler auswählen und ihre Entwicklung ansehen."],profile:[current.name,current.class],observe:["Neue Beobachtung","Erfassen, was du beobachtet hast."],voice:["Spracheingabe","Beobachtung frei erzählen."],review:["Beobachtung prüfen","Text vor der Analyse kontrollieren."],analyzing:["KI-Auswertung","Pädagogische Informationen werden erkannt."],analysis:["KI-Auswertung","Erkannte pädagogische Kategorien."],results:["KI-Ergebnisse","Strukturierte Informationen auf einen Blick."],saved:["Gespeichert","Informationen wurden strukturiert abgelegt."]};
+ document.getElementById("title").textContent=map[id][0];document.getElementById("subtitle").textContent=map[id][1];
+ document.getElementById("backBtn").classList.toggle("hidden",id==="home");
+}
+function showPage(id,add=true){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");setHeader(id);
+ if(add && history[history.length-1]!==id)history.push(id);
+ document.querySelectorAll(".nav button[data-nav]").forEach(b=>b.classList.toggle("active",b.dataset.nav===id || (id==="profile"&&b.dataset.nav==="profile")));
+ if(id==="students")renderStudents();
+ if(id==="profile")renderProfile();
+ window.scrollTo(0,0);
+}
+function goBack(){if(history.length>1){history.pop();showPage(history[history.length-1],false)}else showPage("home")}
+function renderStudents(){
+ const q=(document.getElementById("studentSearch").value||"").toLowerCase();
+ const list=students.filter(s=>s.name.toLowerCase().includes(q)).map(s=>`<div class="listitem" onclick="selectStudent('${s.name}')"><div class="avatar">${s.avatar}</div><div><b>${s.name}</b><br><span>${s.class}</span></div><span style="margin-left:auto;color:#9aa4b2">›</span></div>`).join("");
+ document.getElementById("studentList").innerHTML=list||"<p class='muted'>Keine Schüler gefunden.</p>";
+}
+function filterStudents(){renderStudents()}
+function selectStudent(name){current=students.find(s=>s.name===name);localStorage.setItem("pki_current",JSON.stringify(current));showPage("profile")}
+function renderProfile(){
+ document.getElementById("profileAvatar").textContent=current.avatar;document.getElementById("profileName").textContent=current.name;document.getElementById("profileClass").textContent=current.class;
+ document.getElementById("obsCount").textContent=current.count+savedObs.filter(x=>x.student===current.name).length;
+ const cls=["teal","green","orange","purple","teal"];
+ document.getElementById("profileTags").innerHTML=current.areas.map((a,i)=>`<span class="tag ${cls[i%cls.length]}">${a}</span>`).join("");
+ const entries=[
+ ...savedObs.filter(x=>x.student===current.name).map(x=>({title:"Neue Beobachtung · heute",text:x.text})),
+ {title:"Heute, 08:47 · Kommunikation",text:"Paul zeigte im Morgenkreis eine zunehmende Beteiligung mit Unterstützung."},
+ {title:"19.08. · Selbstständigkeit",text:"Paul führte Teile seiner Morgenroutine selbstständig durch."},
+ {title:"14.08. · Förderplanung",text:"Aktueller Unterstützungsbedarf wurde dokumentiert."}
+ ];
+ document.getElementById("timeline").innerHTML=entries.map(e=>`<div class="event"><b>${e.title}</b><p>${e.text}</p></div>`).join("");
+}
+function toggleVoice(){
+ const btn=document.getElementById("voiceBtn");
+ if(!voiceTimer){voiceTimer=setInterval(()=>{voiceSec++;document.getElementById("voiceTime").textContent="00:"+String(voiceSec).padStart(2,"0")},1000);btn.textContent="Aufnahme beenden"}
+ else{clearInterval(voiceTimer);voiceTimer=null;useDemoVoice()}
+}
+function useDemoVoice(){
+ if(voiceTimer){clearInterval(voiceTimer);voiceTimer=null}
+ document.getElementById("observationText").value="Paul hat heute erstmals selbstständig seinen Talker genutzt. Im Morgenkreis benötigte er noch Unterstützung.";
+ document.getElementById("voiceTime").textContent="00:18";showPage("review");
+}
+function runAnalysis(){
+ showPage("analyzing");
+ setTimeout(()=>{renderCategories();showPage("analysis")},1500);
+}
+function renderCategories(){
+ const cats=[
+ ["💬","Kommunikation","2 Hinweise"],
+ ["🌱","Selbstständigkeit","1 Hinweis"],
+ ["⭐","Entwicklungsfortschritt","1 Hinweis"],
+ ["🟣","Unterstützungsbedarf","1 Hinweis"],
+ ["📋","Förderplanung","1 Hinweis"]
+ ];
+ document.getElementById("categoryList").innerHTML=cats.map(c=>`<div class="cat"><div class="left"><span>${c[0]}</span><b>${c[1]}</b></div><span class="count">${c[2]}</span></div>`).join("");
+}
+function openTab(id,el){
+ document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");
+ document.querySelectorAll(".tabpanel").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");
+}
+function saveObservation(){
+ savedObs.unshift({student:current.name,text:document.getElementById("observationText").value,date:new Date().toISOString()});
+ localStorage.setItem("pki_obs",JSON.stringify(savedObs));showPage("saved");
+}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+renderStudents();renderProfile();
+</script>
+</body>
+</html>
