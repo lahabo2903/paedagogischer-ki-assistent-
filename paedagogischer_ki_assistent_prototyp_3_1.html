@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f9fb">
+<title>Pädagogischer KI-Assistent – Prototyp 3.1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fa;color:#17212b}
+.app{max-width:760px;margin:auto;min-height:100vh;background:#fff;box-shadow:0 0 30px #00000008}
+header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #e9edf2;padding:18px 18px 14px;display:flex;align-items:center;gap:12px}
+header h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:#7b8794;font-size:13px}.back{border:0;background:#eef3f6;border-radius:12px;width:40px;height:40px;font-size:20px}.hidden{display:none!important}
+main{padding:18px 16px 95px}.page{display:none}.page.active{display:block}.card{background:#fff;border:1px solid #e7ecf1;border-radius:18px;padding:17px;margin-bottom:14px;box-shadow:0 4px 16px #00000005}
+.hero{padding:28px 20px;background:linear-gradient(135deg,#eef8f7,#f8fbfd);border:0}.hero h2{font-size:28px;margin:5px 0 8px}.hero p{color:#667482;line-height:1.5}
+.primary,.secondary{width:100%;border:0;border-radius:14px;padding:14px 16px;font-size:16px;font-weight:650;cursor:pointer}.primary{background:#147d78;color:#fff}.secondary{background:#edf3f5;color:#23404a;margin-top:8px}
+.row{display:flex;align-items:center;gap:12px}.row>*:last-child{margin-left:auto}.muted,.small{color:#7d8995}.small{font-size:13px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border-top:1px solid #e7ecf1;z-index:6;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.nav button{border:0;background:transparent;padding:9px;border-radius:12px;color:#7b8794;font-size:12px}.nav button.active{background:#eef8f7;color:#147d78;font-weight:700}.nav span{display:block;font-size:19px;margin-bottom:2px}
+.search,input,textarea,select{width:100%;border:1px solid #dce4ea;border-radius:13px;padding:13px;font:inherit;background:#fff}.search{margin-bottom:12px}textarea{min-height:180px;resize:vertical}
+.listitem{display:flex;align-items:center;gap:12px;padding:13px 3px;border-bottom:1px solid #edf0f3;cursor:pointer}.listitem:last-child{border-bottom:0}.avatar,.bigavatar{background:#eef4f6;border-radius:50%;display:grid;place-items:center}.avatar{width:44px;height:44px;font-size:22px}.bigavatar{width:74px;height:74px;font-size:38px;margin:auto}.profile{text-align:center}.profile h2{margin:9px 0 3px}
+.tags{display:flex;gap:7px;flex-wrap:wrap}.tag{background:#eef8f7;color:#147d78;border-radius:20px;padding:6px 10px;font-size:12px}.stats{display:flex;gap:10px;margin-top:16px}.stat{flex:1;background:#f6f8fa;border-radius:13px;padding:11px;text-align:center}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:#7d8995}
+.timeline .event{border-left:3px solid #b8dedb;padding:0 0 16px 13px;margin-left:5px}.event b{font-size:13px}.event p{margin:5px 0;color:#53616d;line-height:1.45}
+.choice{display:flex;align-items:center;gap:15px;padding:18px;border:1px solid #e2e8ed;border-radius:17px;margin:10px 0;cursor:pointer}.ico{font-size:27px}.choice span{display:block;color:#7d8995;font-size:13px;margin-top:3px}
+.note{background:#f4f8f9;border-radius:14px;padding:13px;color:#5d6b75;font-size:13px;line-height:1.45;margin-top:14px}
+.progress{height:6px;background:#e9eff2;border-radius:10px;margin-bottom:25px}.progress i{display:block;width:55%;height:100%;background:#147d78;border-radius:10px}
+.voice{text-align:center;padding:30px 10px}.mic{width:100px;height:100px;border-radius:50%;margin:20px auto;background:#e9f6f4;display:grid;place-items:center;font-size:45px}.timer{font-size:26px;font-variant-numeric:tabular-nums;margin:15px}
+.tabs{display:flex;gap:5px;overflow:auto;margin-bottom:12px}.tab{border:0;background:#f0f3f5;padding:9px 12px;border-radius:10px;white-space:nowrap}.tab.active{background:#147d78;color:#fff}.tabpanel{display:none}.tabpanel.active{display:block}
+.cat{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #edf0f3}.cat .left{display:flex;gap:10px;align-items:center}.count{font-size:12px;color:#7d8995}.success{text-align:center;padding:35px 10px}.check{font-size:55px}
+label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}.danger{color:#a84a4a}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<button id="backBtn" class="back hidden" onclick="goBack()">‹</button>
+<div><h1 id="title">Pädagogischer KI-Assistent</h1><p id="subtitle">Einmal beobachten. Alles dokumentieren.</p></div>
+</header>
+<main>
+
+<section class="page active" id="home">
+<div class="hero card"><div style="font-size:42px">🌱</div><h2>Einmal beobachten.<br>Alles dokumentieren.</h2><p>Beobachtungen erfassen, pädagogisch strukturieren und direkt in der Schülerchronik sichern.</p><button class="primary" onclick="showPage('students')">Schüler öffnen</button></div>
+<div class="card"><div class="row"><h3>Zuletzt bearbeitet</h3><span class="small">gespeichert</span></div><div id="recentHome"></div></div>
+</section>
+
+<section class="page" id="students">
+<input class="search" id="studentSearch" placeholder="🔎 Schüler suchen..." oninput="renderStudents()">
+<div class="card" id="studentList"></div>
+<button class="primary" onclick="showPage('newStudent')">＋ Schüler anlegen</button>
+</section>
+
+<section class="page" id="newStudent">
+<div class="card">
+<h2>Neuen Schüler anlegen</h2>
+<label>Name</label><input id="newName" placeholder="Vorname Nachname">
+<label>Klasse</label><input id="newClass" placeholder="z. B. Klasse 3a">
+<label>Förderbereiche</label><input id="newAreas" placeholder="z. B. Kommunikation, Selbstständigkeit">
+<label>Symbol / Avatar</label><select id="newAvatar"><option>👦</option><option>👧</option><option>🧑</option><option>👤</option></select>
+<button class="primary" style="margin-top:16px" onclick="createStudent()">Schüler speichern</button>
+</div>
+</section>
+
+<section class="page" id="profile">
+<div class="card"><div class="profile"><div class="bigavatar" id="profileAvatar"></div><h2 id="profileName"></h2><div class="muted small" id="profileClass"></div></div>
+<h3 style="margin-top:18px">Förderbereiche</h3><div class="tags" id="profileTags"></div>
+<div class="stats"><div class="stat"><b id="obsCount">0</b><span>Beobachtungen</span></div><div class="stat"><b id="lastObs">–</b><span>Letzte Beobachtung</span></div></div></div>
+<button class="primary" onclick="startObservation()">＋ Beobachtung aufnehmen</button>
+<div class="card" style="margin-top:14px"><div class="row"><h3>Schülerchronik</h3><span class="small">Neueste zuerst</span></div><div class="timeline" id="timeline"></div></div>
+</section>
+
+<section class="page" id="observe">
+<div class="progress"><i></i></div><h2>Neue Beobachtung</h2><p class="muted">Wie möchtest du die Beobachtung erfassen?</p>
+<div class="choice" onclick="showPage('voice')"><div class="ico">🎤</div><div><b>Spracheingabe</b><span>Beobachtung frei erzählen</span></div></div>
+<div class="choice" onclick="openTextEntry()"><div class="ico">⌨️</div><div><b>Texteingabe</b><span>Beobachtung direkt schreiben</span></div></div>
+<div class="note">✨ Die Beobachtung wird anschließend dem aktuell ausgewählten Schüler zugeordnet und gemeinsam mit der Auswertung gespeichert.</div>
+</section>
+
+<section class="page" id="voice">
+<div class="voice"><h2>Spracheingabe</h2><p class="muted" id="voiceHint">Tippe auf das Mikrofon, um die Aufnahme zu starten.</p><div class="mic" id="mic">🎤</div><div class="timer" id="voiceTime">00:00</div><button class="primary" id="voiceBtn" onclick="toggleVoice()">Aufnahme starten</button><button class="secondary" onclick="useDemoVoice()">Demo-Beobachtung verwenden</button></div>
+</section>
+
+<section class="page" id="review">
+<div class="progress"><i style="width:75%"></i></div><h2>Beobachtung prüfen</h2><p class="muted">Prüfe den Text, bevor die pädagogische Strukturierung erfolgt.</p>
+<div class="card"><textarea id="observationText"></textarea></div>
+<button class="primary" onclick="runAnalysis()">Beobachtung analysieren</button>
+</section>
+
+<section class="page" id="analyzing">
+<div class="success"><div class="check">✨</div><h2>Beobachtung wird ausgewertet …</h2><p class="muted">Pädagogisch relevante Informationen werden erkannt.</p></div>
+</section>
+
+<section class="page" id="analysis">
+<h2>KI-Auswertung</h2><p class="muted">Diese Informationen wurden in der Beobachtung erkannt.</p>
+<div class="card" id="categoryList"></div><button class="primary" onclick="showPage('results')">Ergebnisse ansehen</button>
+</section>
+
+<section class="page" id="results">
+<h2>KI-Ergebnisse</h2><div class="tabs">
+<button class="tab active" onclick="openTab('r1',this)">Übersicht</button><button class="tab" onclick="openTab('r2',this)">Förderplan</button><button class="tab" onclick="openTab('r3',this)">Zeugnis</button><button class="tab" onclick="openTab('r4',this)">Gespräch</button></div>
+<div id="r1" class="tabpanel active card"></div><div id="r2" class="tabpanel card"></div><div id="r3" class="tabpanel card"></div><div id="r4" class="tabpanel card"></div>
+<button class="primary" onclick="saveObservation()">💾 Alles beim Schüler speichern</button>
+</section>
+
+<section class="page" id="saved">
+<div class="success"><div class="check">✅</div><h2>Gespeichert</h2><p id="savedText" class="muted"></p><button class="primary" onclick="showPage('profile')">Zur Schülerchronik</button><button class="secondary" onclick="showPage('students')">Zur Schülerübersicht</button></div>
+</section>
+
+</main>
+<nav class="nav">
+<button data-nav="home" onclick="showPage('home')"><span>⌂</span>Start</button>
+<button data-nav="students" onclick="showPage('students')"><span>👥</span>Schüler</button>
+<button data-nav="profile" onclick="showPage('profile')"><span>📖</span>Chronik</button>
+</nav>
+</div>
+
+<script>
+const defaultStudents=[
+{name:"Paul Müller",class:"Klasse 3a",avatar:"👦",areas:["Kommunikation","Selbstständigkeit","Entwicklung"],count:36},
+{name:"Emma Schneider",class:"Klasse 3a",avatar:"👧",areas:["Kommunikation","Soziale Kompetenz","Selbstständigkeit"],count:24},
+{name:"Max Weber",class:"Klasse 3a",avatar:"👦",areas:["Lernen / Kognition","Motorik","Selbstständigkeit"],count:19},
+{name:"Lena Hoffmann",class:"Klasse 3b",avatar:"👧",areas:["Kommunikation","Soziale Kompetenz"],count:31},
+{name:"Jonas Krause",class:"Klasse 2a",avatar:"👦",areas:["Selbstständigkeit","Motorik"],count:14}
+];
+
+let students=load("pki_students",defaultStudents);
+let savedObs=load("pki_obs",[]);
+let currentName=localStorage.getItem("pki_current_name")||students[0]?.name;
+let current=students.find(s=>s.name===currentName)||students[0];
+let history=["home"],voiceTimer=null,voiceSec=0,analysisData=null;
+
+function load(key,fallback){try{const x=JSON.parse(localStorage.getItem(key));return x??fallback}catch(e){return fallback}}
+function persist(){localStorage.setItem("pki_students",JSON.stringify(students));localStorage.setItem("pki_obs",JSON.stringify(savedObs));if(current)localStorage.setItem("pki_current_name",current.name)}
+function selectStudent(name){current=students.find(s=>s.name===name);persist();showPage("profile")}
+function createStudent(){
+ const name=document.getElementById("newName").value.trim(), cls=document.getElementById("newClass").value.trim()||"Klasse –", areas=document.getElementById("newAreas").value.split(",").map(x=>x.trim()).filter(Boolean), avatar=document.getElementById("newAvatar").value;
+ if(!name){alert("Bitte einen Namen eingeben.");return}
+ if(students.some(s=>s.name.toLowerCase()===name.toLowerCase())){alert("Dieser Schüler ist bereits vorhanden.");return}
+ const s={name,class:cls,avatar,areas:areas.length?areas:["Allgemeine Entwicklung"],count:0,createdAt:new Date().toISOString()};
+ students.push(s);current=s;persist();document.getElementById("newName").value="";document.getElementById("newClass").value="";document.getElementById("newAreas").value="";showPage("profile");
+}
+function renderStudents(){
+ const q=(document.getElementById("studentSearch")?.value||"").toLowerCase();
+ const list=students.filter(s=>s.name.toLowerCase().includes(q)).map(s=>`<div class="listitem" onclick="selectStudent(${JSON.stringify(s.name)})"><div class="avatar">${s.avatar}</div><div><b>${escapeHtml(s.name)}</b><br><span>${escapeHtml(s.class)}</span></div><span style="margin-left:auto;color:#9aa4b2">›</span></div>`).join("");
+ document.getElementById("studentList").innerHTML=list||"<p class='muted'>Keine Schüler gefunden.</p>";
+}
+function renderProfile(){
+ if(!current)return;
+ document.getElementById("profileAvatar").textContent=current.avatar;document.getElementById("profileName").textContent=current.name;document.getElementById("profileClass").textContent=current.class;
+ const obs=savedObs.filter(x=>x.student===current.name);
+ document.getElementById("obsCount").textContent=(current.count||0)+obs.length;
+ document.getElementById("lastObs").textContent=obs[0]?formatDate(obs[0].date):"–";
+ document.getElementById("profileTags").innerHTML=current.areas.map((a)=>`<span class="tag">${escapeHtml(a)}</span>`).join("");
+ const entries=obs.map(x=>({title:formatDateTime(x.date)+" · Beobachtung",text:x.text})); 
+ const demo=current.name==="Paul Müller"?[
+ {title:"Heute, 08:47 · Kommunikation",text:"Paul zeigte im Morgenkreis eine zunehmende Beteiligung mit Unterstützung."},
+ {title:"19.08. · Selbstständigkeit",text:"Paul führte Teile seiner Morgenroutine selbstständig durch."},
+ {title:"14.08. · Förderplanung",text:"Aktueller Unterstützungsbedarf wurde dokumentiert."}]:[];
+ document.getElementById("timeline").innerHTML=[...entries,...demo].map(e=>`<div class="event"><b>${escapeHtml(e.title)}</b><p>${escapeHtml(e.text)}</p></div>`).join("")||"<p class='muted'>Noch keine Beobachtungen gespeichert.</p>";
+}
+function startObservation(){showPage("observe")}
+function openTextEntry(){document.getElementById("observationText").value="";showPage("review")}
+function toggleVoice(){
+ const btn=document.getElementById("voiceBtn");
+ if(!voiceTimer){voiceTimer=setInterval(()=>{voiceSec++;document.getElementById("voiceTime").textContent="00:"+String(voiceSec).padStart(2,"0")},1000);btn.textContent="Aufnahme beenden";document.getElementById("voiceHint").textContent="Aufnahme läuft …"}
+ else{clearInterval(voiceTimer);voiceTimer=null;btn.textContent="Aufnahme starten";document.getElementById("voiceHint").textContent="Aufnahme beendet.";useDemoVoice()}
+}
+function useDemoVoice(){
+ if(voiceTimer){clearInterval(voiceTimer);voiceTimer=null}
+ document.getElementById("observationText").value=`${current.name.split(" ")[0]} hat heute erstmals selbstständig seinen Talker genutzt. Im Morgenkreis benötigte er noch Unterstützung.`;
+ document.getElementById("voiceTime").textContent="00:18";showPage("review");
+}
+function runAnalysis(){
+ const text=document.getElementById("observationText").value.trim();if(!text){alert("Bitte zuerst eine Beobachtung eingeben.");return}
+ analysisData=buildAnalysis(text);showPage("analyzing");setTimeout(()=>{renderAnalysis();showPage("analysis")},700);
+}
+function buildAnalysis(text){
+ const lower=text.toLowerCase(), name=current.name.split(" ")[0];
+ const comm=/talker|kommunik|sprache|gesprochen|mitgeteilt|äußert|symbol/.test(lower);
+ const self=/selbstständig|selbständig|allein|ohne hilfe|ohne unterstützung/.test(lower);
+ const support=/unterstützung|hilfe|begleitung/.test(lower);
+ return {
+ text,
+ categories:[comm?"Kommunikation":"Beobachtung",self?"Selbstständigkeit":"Handlungsfähigkeit",support?"Unterstützungsbedarf":"Entwicklungsfortschritt","Förderplanung"],
+ overview:`${name} zeigt im Rahmen der Beobachtung relevante Hinweise für die pädagogische Dokumentation. ${comm?"Im Bereich Kommunikation zeigen sich konkrete Ansatzpunkte. ":""}${self?"Ein Aspekt der Selbstständigkeit wurde sichtbar. ":""}${support?"Gleichzeitig wird ein Unterstützungsbedarf beschrieben.":""}`,
+ foerder:`Förderbereich: ${comm?"Kommunikation":"individuelle Entwicklung"}\n\n${name} soll seine Fähigkeiten in der beobachteten Situation weiterentwickeln und zunehmend selbstständig nutzen. Unterstützungsangebote werden dabei gezielt eingesetzt und schrittweise reduziert.`,
+ zeugnis:`${name} entwickelt seine Fähigkeiten kontinuierlich weiter. In der beobachteten Situation zeigte sich eine positive Entwicklung${self?" in Richtung zunehmender Selbstständigkeit":""}.`,
+ gespraech:`Beobachtung: ${text}\n\nGesprächsimpuls: Welche Bedingungen haben die beobachtete Fähigkeit unterstützt und wie kann diese Entwicklung im Alltag weiter gefördert werden?`
+ };
+}
+function renderAnalysis(){
+ document.getElementById("categoryList").innerHTML=analysisData.categories.map((c,i)=>`<div class="cat"><div class="left"><span>${["💬","🌱","🟣","📋"][i%4]}</span><b>${escapeHtml(c)}</b></div><span class="count">Hinweis</span></div>`).join("");
+ document.getElementById("r1").innerHTML="<b>Zusammenfassung</b><p>"+escapeHtml(analysisData.overview)+"</p><hr><b>Originalbeobachtung</b><p>"+escapeHtml(analysisData.text)+"</p>";
+ document.getElementById("r2").innerHTML="<p>"+escapeHtml(analysisData.foerder).replace(/\n/g,"<br>")+"</p>";
+ document.getElementById("r3").innerHTML="<p>"+escapeHtml(analysisData.zeugnis)+"</p>";
+ document.getElementById("r4").innerHTML="<p>"+escapeHtml(analysisData.gespraech).replace(/\n/g,"<br>")+"</p>";
+}
+function saveObservation(){
+ if(!analysisData)return;
+ const now=new Date();
+ savedObs.unshift({id:Date.now().toString(),student:current.name,text:analysisData.text,date:now.toISOString(),analysis:{categories:analysisData.categories,overview:analysisData.overview,foerderplan:analysisData.foerder,zeugnis:analysisData.zeugnis,gespraech:analysisData.gespraech}});
+ persist();document.getElementById("savedText").textContent=`Die Beobachtung und ihre strukturierten Ergebnisse wurden bei ${current.name} gespeichert.`;showPage("saved");
+}
+function formatDate(iso){return new Date(iso).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"})}
+function formatDateTime(iso){return new Date(iso).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function setHeader(id){
+ const map={home:["Pädagogischer KI-Assistent","Einmal beobachten. Alles dokumentieren."],students:["Schüler","Schüler auswählen und ihre Entwicklung ansehen."],newStudent:["Schüler anlegen","Einen neuen Schüler dauerhaft speichern."],profile:[current?.name||"Schüler",current?.class||""],observe:["Neue Beobachtung","Erfassen, was du beobachtet hast."],voice:["Spracheingabe","Beobachtung frei erzählen."],review:["Beobachtung prüfen","Text vor der Analyse kontrollieren."],analyzing:["KI-Auswertung","Pädagogische Informationen werden erkannt."],analysis:["KI-Auswertung","Erkannte pädagogische Kategorien."],results:["KI-Ergebnisse","Strukturierte Informationen auf einen Blick."],saved:["Gespeichert","Informationen wurden beim Schüler abgelegt."]};
+ document.getElementById("title").textContent=map[id][0];document.getElementById("subtitle").textContent=map[id][1];document.getElementById("backBtn").classList.toggle("hidden",id==="home");
+}
+function showPage(id,add=true){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");setHeader(id);
+ if(add&&history[history.length-1]!==id)history.push(id);
+ document.querySelectorAll(".nav button[data-nav]").forEach(b=>b.classList.toggle("active",b.dataset.nav===id||(id==="profile"&&b.dataset.nav==="profile")));
+ if(id==="students")renderStudents();if(id==="profile")renderProfile();if(id==="home")renderHome();window.scrollTo(0,0);
+}
+function renderHome(){
+ const x=savedObs[0];document.getElementById("recentHome").innerHTML=x?`<div class="listitem" onclick="selectStudent(${JSON.stringify(x.student)})"><div class="avatar">📝</div><div><b>${escapeHtml(x.student)}</b><br><span>${escapeHtml(x.text.slice(0,90))}${x.text.length>90?"…":""}</span></div></div>`:"<p class='muted'>Noch keine eigenen Beobachtungen gespeichert.</p>";
+}
+function goBack(){if(history.length>1){history.pop();showPage(history[history.length-1],false)}else showPage("home")}
+function openTab(id,el){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");document.querySelectorAll(".tabpanel").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active")}
+persist();renderStudents();renderProfile();renderHome();
+</script>
+</body>
+</html>
