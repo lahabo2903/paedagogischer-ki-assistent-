@@ -1,1 +1,0 @@
-# paedagogischer-ki-assistent-
