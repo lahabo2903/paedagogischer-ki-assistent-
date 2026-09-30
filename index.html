@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f8fc">
+<title>Pädagogischer KI-Assistent – Version 3.1</title>
+<style>
+:root{
+  --blue:#2467c7; --blue2:#174f9d; --ink:#17233a; --muted:#6d7788;
+  --bg:#f5f7fb; --card:#fff; --line:#e5e9f0; --green:#18885a;
+  --purple:#7a4cc2; --orange:#c97817; --teal:#177f88; --red:#b33;
+  --shadow:0 10px 30px rgba(20,40,80,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit}
+.app{max-width:540px;min-height:100dvh;margin:auto;background:var(--bg);padding-bottom:92px}
+.top{position:sticky;top:0;z-index:5;background:rgba(245,247,251,.94);backdrop-filter:blur(14px);padding:calc(env(safe-area-inset-top) + 12px) 18px 12px;border-bottom:1px solid rgba(229,233,240,.7)}
+.toprow{display:flex;align-items:center;gap:12px}.top h1{font-size:19px;margin:0;font-weight:750;letter-spacing:-.2px}.top .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.back{width:38px;height:38px;border:0;border-radius:12px;background:#fff;color:var(--ink);font-size:24px;line-height:1}
+.page{padding:18px;display:none}.page.active{display:block;animation:in .22s ease-out}@keyframes in{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 8px}.card h3{font-size:14px;margin:0 0 9px}.muted{color:var(--muted)}.small{font-size:12px}.center{text-align:center}
+.primary,.secondary,.danger,.mini{border:0;border-radius:15px;padding:15px 16px;font-weight:700;width:100%;cursor:pointer}
+.primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 8px 18px rgba(36,103,199,.22)}
+.secondary{background:#fff;color:var(--blue2);border:1px solid #ccd8eb}.danger{background:#fff0f0;color:var(--red);border:1px solid #ffd3d3}
+.mini{width:auto;padding:8px 11px;font-size:12px;background:#f3f6fb;color:var(--blue2)}
+.hero{padding:24px 18px}.hero h2{font-size:22px;margin-bottom:5px}.hero p{margin:0;color:var(--muted);font-size:14px}
+.big-action{margin:18px 0;background:linear-gradient(135deg,#2b74d4,#164b95);border-radius:22px;color:#fff;padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 28px rgba(36,103,199,.22);cursor:pointer}
+.big-action .mic{width:48px;height:48px;border-radius:16px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:26px}.big-action b{font-size:17px}.big-action span{font-size:12px;opacity:.82}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.activity{padding:13px 0;border-bottom:1px solid var(--line)}.activity:last-child{border-bottom:0}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#e9f0fb;font-size:20px;flex:none}
+.listitem{display:flex;align-items:center;gap:12px;padding:14px 2px;border-bottom:1px solid var(--line);cursor:pointer}.listitem:last-child{border-bottom:0}.listitem b{font-size:15px}.listitem span{font-size:12px;color:var(--muted)}
+.search{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;outline:none;margin-bottom:12px}
+.profile{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px}.profile .bigavatar{width:76px;height:76px;border-radius:50%;background:#e9f0fb;display:grid;place-items:center;font-size:38px;border:4px solid #fff;box-shadow:0 0 0 1px var(--line)}.profile h2{margin:9px 0 2px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}.tag{padding:9px 11px;border-radius:999px;background:#f2f5fa;font-size:12px}.tag.teal{background:#eaf8f7;color:var(--teal)}.tag.green{background:#ecf8f1;color:var(--green)}.tag.purple{background:#f3effb;color:var(--purple)}.tag.orange{background:#fff4e7;color:var(--orange)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.stat{padding:13px;border-radius:15px;background:#f7f9fc}.stat b{display:block;font-size:19px}.stat span{font-size:11px;color:var(--muted)}
+.choice{display:flex;align-items:center;gap:13px;padding:18px;border:1px solid var(--line);background:#fff;border-radius:18px;margin-bottom:12px;cursor:pointer}.choice .ico{font-size:26px;width:42px;text-align:center}.choice b{display:block}.choice span{font-size:12px;color:var(--muted)}
+textarea{width:100%;min-height:180px;border:1px solid var(--line);border-radius:18px;padding:15px;resize:vertical;outline:none;background:#fff;line-height:1.55}
+.input,select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;outline:none;margin-top:5px}
+.field{margin-bottom:13px}.field label{display:block;font-size:12px;font-weight:700;color:#526177}
+.progress{height:4px;background:#e3e8f2;border-radius:9px;overflow:hidden;margin:10px 0 22px}.progress i{display:block;width:62%;height:100%;background:var(--blue);border-radius:9px}
+.analysis-intro{padding:4px 4px 14px}.cat{display:flex;align-items:center;justify-content:space-between;padding:14px;border:1px solid var(--line);border-radius:15px;background:#fff;margin:9px 0}.cat .left{display:flex;align-items:center;gap:10px}.count{font-size:11px;color:var(--muted);background:#f3f5f8;padding:5px 8px;border-radius:999px}
+.insight{padding:15px;border-radius:17px;margin:10px 0;border:1px solid var(--line);background:#fff}.insight .label{font-size:12px;font-weight:750;margin-bottom:5px}.insight p{margin:0;font-size:14px;line-height:1.45}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:14px}.tab{padding:10px 4px;text-align:center;border-radius:12px;font-size:11px;color:var(--muted);border:1px solid transparent;cursor:pointer}.tab.active{background:#eaf1fb;color:var(--blue2);border-color:#d8e5f7;font-weight:700}
+.tabpanel{display:none}.tabpanel.active{display:block}.timeline{position:relative;padding-left:20px}.timeline:before{content:"";position:absolute;left:5px;top:7px;bottom:7px;width:2px;background:#dce5f1}.event{position:relative;padding:0 0 17px 10px}.event:before{content:"";position:absolute;left:-18px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px #eaf1fb}.event b{font-size:13px}.event p{margin:4px 0 0;font-size:13px;color:#465268;line-height:1.4}
+.eventmeta{font-size:11px;color:var(--muted);margin-top:4px}
+.savecheck{width:82px;height:82px;border-radius:50%;background:#e7f7ef;color:var(--green);display:grid;place-items:center;font-size:42px;margin:32px auto 18px}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:10;width:min(540px,100%);padding:10px 18px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.93);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.nav button{border:0;background:transparent;color:var(--muted);padding:6px;font-size:10px}.nav button.active{color:var(--blue2);font-weight:700}.nav .nicon{display:block;font-size:18px;margin-bottom:2px}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(120px);bottom:92px;background:#17233a;color:#fff;padding:12px 16px;border-radius:999px;font-size:13px;z-index:30;transition:.25s;box-shadow:var(--shadow);max-width:90%;text-align:center}.toast.show{transform:translateX(-50%) translateY(0)}
+.loader{width:68px;height:68px;border:6px solid #e5edf9;border-top-color:var(--blue);border-radius:50%;margin:40px auto 20px;animation:spin .9s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.wave{height:42px;margin:14px 0;background:repeating-linear-gradient(90deg,transparent 0 4px,#8fb3e9 4px 6px,transparent 6px 10px);mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);opacity:.8}
+.note{padding:12px 13px;border-radius:14px;background:#eef4fd;color:#526177;font-size:12px;line-height:1.45}
+.hidden{display:none!important}
+.section-title{margin:4px 0 10px;font-size:16px}.two-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.student-actions{display:flex;gap:8px;margin-top:14px}.student-actions button{flex:1}
+.empty{padding:24px 8px;text-align:center;color:var(--muted);font-size:13px}
+.status{font-size:12px;color:var(--muted);min-height:18px;margin-top:10px}
+@media(min-width:600px){body{background:#e9edf5}.app{box-shadow:0 0 0 1px #dde3ed,0 20px 60px rgba(23,35,58,.12)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="toprow">
+      <button class="back hidden" id="backBtn" onclick="goBack()">‹</button>
+      <div><h1 id="title">Pädagogischer KI-Assistent</h1><div class="sub" id="subtitle">Einmal beobachten. Alles dokumentieren.</div></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" id="home">
+      <div class="card hero"><h2>Guten Morgen! 👋</h2><p>Hier ist dein Überblick für heute.</p></div>
+      <div class="big-action" onclick="startObservation()"><div class="mic">🎤</div><div><b>Neue Beobachtung</b><br><span id="homeActionText">Sprache oder Text</span></div></div>
+      <div class="card">
+        <div class="row"><h3>Letzte Aktivitäten</h3><button class="mini" onclick="showPage('students')">Schüler</button></div>
+        <div id="activityList"></div>
+      </div>
+    </section>
+
+    <section class="page" id="students">
+      <input class="search" id="studentSearch" placeholder="🔎  Schüler suchen..." oninput="renderStudents()">
+      <div class="card" id="studentList"></div>
+      <button class="secondary" onclick="openStudentForm()">＋ Schüler anlegen</button>
+    </section>
+
+    <section class="page" id="studentForm">
+      <div class="card">
+        <h2 id="studentFormTitle">Neuen Schüler anlegen</h2>
+        <div class="field"><label for="studentFirstName">Vorname *</label><input class="input" id="studentFirstName" placeholder="z. B. Paul"></div>
+        <div class="field"><label for="studentLastName">Nachname *</label><input class="input" id="studentLastName" placeholder="z. B. Müller"></div>
+        <div class="field"><label for="studentClass">Klasse *</label><input class="input" id="studentClass" placeholder="z. B. 3a"></div>
+        <div class="field"><label for="studentAvatar">Symbol</label>
+          <select id="studentAvatar"><option value="👦">👦</option><option value="👧">👧</option><option value="🧒">🧒</option><option value="🙂">🙂</option></select>
+        </div>
+        <div class="field"><label for="studentAreas">Förderbereiche (durch Komma trennen)</label><input class="input" id="studentAreas" placeholder="z. B. Kommunikation, Selbstständigkeit"></div>
+      </div>
+      <button class="primary" onclick="saveStudent()">Schüler speichern</button>
+      <button class="secondary" style="margin-top:10px" onclick="showPage('students')">Abbrechen</button>
+    </section>
+
+    <section class="page" id="profile">
+      <div id="profileContent"></div>
+    </section>
+
+    <section class="page" id="observe">
+      <div class="progress"><i></i></div>
+      <div class="analysis-intro"><h2>Neue Beobachtung</h2><p class="muted" id="observeStudentInfo"></p></div>
+      <div class="card">
+        <div class="field"><label for="observationContext">Fach / Situation</label>
+          <input class="input" id="observationContext" placeholder="z. B. Mathematik, Morgenkreis, Pause">
+        </div>
+        <div class="field"><label for="observationCategory">Kategorie</label>
+          <select id="observationCategory">
+            <option value="Allgemeine Beobachtung">Allgemeine Beobachtung</option>
+            <option value="Kommunikation">Kommunikation</option>
+            <option value="Selbstständigkeit">Selbstständigkeit</option>
+            <option value="Soziale Kompetenz">Soziale Kompetenz</option>
+            <option value="Lernen / Kognition">Lernen / Kognition</option>
+            <option value="Motorik">Motorik</option>
+            <option value="Emotionen / Verhalten">Emotionen / Verhalten</option>
+          </select>
+        </div>
+      </div>
+      <div class="choice" onclick="showPage('voice')"><div class="ico">🎤</div><div><b>Spracheingabe</b><span>Beobachtung frei erzählen</span></div></div>
+      <div class="choice" onclick="prepareTextInput()"><div class="ico">⌨️</div><div><b>Texteingabe</b><span>Beobachtung direkt schreiben</span></div></div>
+      <div class="note">Die Beobachtung wird zuerst gespeichert. Die KI-Auswertung bleibt in Version 3.1 eine transparente Demo, bis wir später eine echte KI sicher anbinden.</div>
+    </section>
+
+    <section class="page" id="voice">
+      <div class="center">
+        <div style="font-size:72px;margin-top:28px">🎙️</div><h2>Spracheingabe</h2>
+        <p class="muted">Sprich einfach, was du beobachtet hast.</p>
+        <div class="wave"></div>
+        <div id="voiceTime" style="font-size:24px;font-weight:750">00:00</div>
+        <div class="status" id="voiceStatus"></div>
+      </div>
+      <button class="primary" id="voiceBtn" onclick="toggleVoice()">Aufnahme starten</button>
+      <button class="secondary" style="margin-top:10px" onclick="stopVoiceAndReview()">Aufnahme beenden</button>
+      <button class="secondary" style="margin-top:10px" onclick="useDemoVoice()">Demo-Beobachtung verwenden</button>
+    </section>
+
+    <section class="page" id="review">
+      <div class="progress"><i style="width:78%"></i></div><h2>Beobachtung prüfen</h2>
+      <p class="muted small">Der Text kann vor dem Speichern vollständig bearbeitet werden.</p>
+      <textarea id="observationText" placeholder="Beschreibe hier deine Beobachtung..."></textarea>
+      <button class="primary" style="margin-top:12px" onclick="runAnalysis()">Weiter zur Auswertung</button>
+    </section>
+
+    <section class="page" id="analyzing">
+      <div class="loader"></div><h2 class="center">Die Beobachtung wird vorbereitet …</h2><p class="center muted">In Version 3.1 wird die pädagogische Strukturierung zunächst als Demo angezeigt.</p>
+    </section>
+
+    <section class="page" id="analysis">
+      <div class="analysis-intro"><h2>Erkannte Bereiche</h2><p class="muted">Die folgenden Bereiche werden für die weitere Dokumentation vorbereitet.</p></div>
+      <div id="categoryList"></div>
+      <button class="primary" onclick="showPage('results')">Ergebnisse ansehen</button>
+    </section>
+
+    <section class="page" id="results">
+      <h2>Beobachtungsergebnis</h2><p class="muted small">Die eigentliche KI-Anbindung kommt in einem späteren Schritt. Die Beobachtung selbst wird jetzt vollständig gespeichert.</p>
+      <div class="tabs">
+        <div class="tab active" onclick="openTab('overview',this)">Übersicht</div>
+        <div class="tab" onclick="openTab('plan',this)">Förderplan</div>
+        <div class="tab" onclick="openTab('report',this)">Zeugnis</div>
+        <div class="tab" onclick="openTab('talk',this)">Gespräch</div>
+      </div>
+      <div class="tabpanel active" id="overview">
+        <div class="insight"><div class="label" style="color:var(--blue2)">● Gespeicherte Beobachtung</div><p id="resultText"></p></div>
+        <div class="insight"><div class="label" style="color:var(--teal)">● Einordnung</div><p id="resultMeta"></p></div>
+      </div>
+      <div class="tabpanel" id="plan"><div class="note">Hier können später automatisch Förderplan-Bausteine aus mehreren Beobachtungen eines Schülers erstellt werden.</div></div>
+      <div class="tabpanel" id="report"><div class="note">Hier können später entwicklungsbezogene Formulierungen für Zeugnisse vorbereitet werden.</div></div>
+      <div class="tabpanel" id="talk"><div class="note">Hier können später Beobachtungen für die Vorbereitung von Elterngesprächen zusammengeführt werden.</div></div>
+      <button class="primary" style="margin-top:14px" onclick="saveObservation()">Informationen speichern</button>
+      <button class="secondary" style="margin-top:10px" onclick="showPage('review')">Beobachtung bearbeiten</button>
+    </section>
+
+    <section class="page" id="saved">
+      <div class="savecheck">✓</div><h2 class="center">Beobachtung gespeichert!</h2>
+      <p class="center muted" id="savedMessage">Die Beobachtung wurde in der Schülerchronik abgelegt.</p>
+      <div class="card"><h3>Jetzt verfügbar für</h3><div class="tags"><span class="tag teal">Chronik</span><span class="tag green">Entwicklungsverlauf</span><span class="tag purple">Spätere KI-Auswertung</span><span class="tag orange">Dokumentation</span></div></div>
+      <button class="primary" onclick="showPage('profile')">Zum Schülerprofil</button>
+      <button class="secondary" style="margin-top:10px" onclick="startObservation()">Weitere Beobachtung</button>
+      <button class="secondary" style="margin-top:10px" onclick="showPage('home')">Zur Startseite</button>
+    </section>
+  </main>
+
+  <nav class="nav">
+    <button data-nav="home" class="active" onclick="showPage('home')"><span class="nicon">⌂</span>Start</button>
+    <button data-nav="students" onclick="showPage('students')"><span class="nicon">♙</span>Schüler</button>
+    <button data-nav="profile" onclick="showPage('profile')"><span class="nicon">▤</span>Chronik</button>
+    <button onclick="exportData()"><span class="nicon">⇩</span>Daten</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_STUDENTS = "pki_students_v31";
+const STORAGE_OBS = "pki_observations_v31";
+const STORAGE_CURRENT = "pki_current_student_v31";
+
+const defaultStudents = [
+  {id: crypto.randomUUID ? crypto.randomUUID() : "student-demo-1", firstName:"Paul", lastName:"Müller", className:"3a", avatar:"👦", areas:["Kommunikation","Selbstständigkeit","Soziale Kompetenz"], createdAt:new Date().toISOString()},
+  {id: crypto.randomUUID ? crypto.randomUUID() : "student-demo-2", firstName:"Emma", lastName:"Schneider", className:"3a", avatar:"👧", areas:["Kommunikation","Soziale Kompetenz"], createdAt:new Date().toISOString()}
+];
+
+let students = JSON.parse(localStorage.getItem(STORAGE_STUDENTS) || "null");
+if(!Array.isArray(students)) {
+  students = defaultStudents;
+  localStorage.setItem(STORAGE_STUDENTS, JSON.stringify(students));
+}
+let observations = JSON.parse(localStorage.getItem(STORAGE_OBS) || "[]");
+let currentStudentId = localStorage.getItem(STORAGE_CURRENT) || students[0]?.id || null;
+let editingStudentId = null;
+let history = ["home"];
+let voiceTimer = null;
+let voiceSec = 0;
+let recognition = null;
+let voiceListening = false;
+
+function fullName(s){ return `${s.firstName} ${s.lastName}`.trim(); }
+function getCurrent(){ return students.find(s => s.id === currentStudentId) || null; }
+function saveStudents(){ localStorage.setItem(STORAGE_STUDENTS, JSON.stringify(students)); }
+function saveObservations(){ localStorage.setItem(STORAGE_OBS, JSON.stringify(observations)); }
+
+function setHeader(id){
+  const current = getCurrent();
+  const name = current ? fullName(current) : "Kein Schüler ausgewählt";
+  const cls = current ? `Klasse ${current.className}` : "Bitte zuerst einen Schüler auswählen.";
+  const map = {
+    home:["Pädagogischer KI-Assistent","Einmal beobachten. Alles dokumentieren."],
+    students:["Schüler","Schüler auswählen und ihre Entwicklung ansehen."],
+    studentForm:[editingStudentId ? "Schüler bearbeiten" : "Neuen Schüler anlegen","Schülerdaten lokal speichern."],
+    profile:[name,cls],
+    observe:["Neue Beobachtung","Erfassen, was du beobachtet hast."],
+    voice:["Spracheingabe","Beobachtung frei erzählen."],
+    review:["Beobachtung prüfen","Text vor dem Speichern kontrollieren."],
+    analyzing:["Auswertung","Informationen werden vorbereitet."],
+    analysis:["Auswertung","Pädagogische Bereiche anzeigen."],
+    results:["Beobachtungsergebnis","Strukturierte Informationen auf einen Blick."],
+    saved:["Gespeichert","Informationen wurden lokal abgelegt."]
+  };
+  document.getElementById("title").textContent = map[id][0];
+  document.getElementById("subtitle").textContent = map[id][1];
+  document.getElementById("backBtn").classList.toggle("hidden", id === "home");
+}
+
+function showPage(id, add=true){
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  const page = document.getElementById(id);
+  if(!page) return;
+  page.classList.add("active");
+  setHeader(id);
+  if(add && history[history.length-1] !== id) history.push(id);
+  document.querySelectorAll(".nav button[data-nav]").forEach(b => {
+    const active = b.dataset.nav === id || (id === "profile" && b.dataset.nav === "profile");
+    b.classList.toggle("active", active);
+  });
+  if(id === "students") renderStudents();
+  if(id === "profile") renderProfile();
+  if(id === "home") renderHome();
+  if(id === "observe") prepareObservePage();
+  window.scrollTo(0,0);
+}
+
+function goBack(){
+  stopRecognition(false);
+  if(history.length > 1){ history.pop(); showPage(history[history.length-1], false); }
+  else showPage("home");
+}
+
+function renderHome(){
+  const current = getCurrent();
+  document.getElementById("homeActionText").textContent = current ? `Für ${fullName(current)} · Sprache oder Text` : "Bitte zuerst Schüler auswählen";
+  const latest = observations.slice(0,5);
+  const list = document.getElementById("activityList");
+  if(!latest.length){
+    list.innerHTML = '<div class="empty">Noch keine Beobachtungen gespeichert.<br>Lege einen Schüler an und starte mit der ersten Beobachtung.</div>';
+    return;
+  }
+  list.innerHTML = latest.map(o => {
+    const s = students.find(x => x.id === o.studentId);
+    return `<div class="activity">
+      <div class="row" style="justify-content:flex-start">
+        <div class="avatar">${s?.avatar || "🧒"}</div>
+        <div><b>${escapeHtml(s ? fullName(s) : "Unbekannter Schüler")}</b><br>
+        <span class="small muted">${formatDate(o.createdAt)} · ${escapeHtml(o.category || "Beobachtung")}</span></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderStudents(){
+  const q = (document.getElementById("studentSearch").value || "").toLowerCase().trim();
+  const filtered = students.filter(s => `${fullName(s)} ${s.className}`.toLowerCase().includes(q));
+  const list = document.getElementById("studentList");
+  if(!filtered.length){
+    list.innerHTML = "<div class='empty'>Keine Schüler gefunden.</div>";
+    return;
+  }
+  list.innerHTML = filtered.map(s => {
+    const count = observations.filter(o => o.studentId === s.id).length;
+    return `<div class="listitem" onclick="selectStudent('${s.id}')">
+      <div class="avatar">${s.avatar}</div>
+      <div><b>${escapeHtml(fullName(s))}</b><br><span>Klasse ${escapeHtml(s.className)} · ${count} Beobachtungen</span></div>
+      <span style="margin-left:auto;color:#9aa4b2">›</span>
+    </div>`;
+  }).join("");
+}
+
+function selectStudent(id){
+  currentStudentId = id;
+  localStorage.setItem(STORAGE_CURRENT, id);
+  showPage("profile");
+}
+
+function openStudentForm(id=null){
+  editingStudentId = id;
+  const s = id ? students.find(x => x.id === id) : null;
+  document.getElementById("studentFormTitle").textContent = s ? "Schüler bearbeiten" : "Neuen Schüler anlegen";
+  document.getElementById("studentFirstName").value = s?.firstName || "";
+  document.getElementById("studentLastName").value = s?.lastName || "";
+  document.getElementById("studentClass").value = s?.className || "";
+  document.getElementById("studentAvatar").value = s?.avatar || "🧒";
+  document.getElementById("studentAreas").value = s?.areas?.join(", ") || "";
+  showPage("studentForm");
+}
+
+function saveStudent(){
+  const firstName = document.getElementById("studentFirstName").value.trim();
+  const lastName = document.getElementById("studentLastName").value.trim();
+  const className = document.getElementById("studentClass").value.trim();
+  const avatar = document.getElementById("studentAvatar").value;
+  const areas = document.getElementById("studentAreas").value.split(",").map(x => x.trim()).filter(Boolean);
+
+  if(!firstName || !lastName || !className){
+    toast("Bitte Vorname, Nachname und Klasse ausfüllen.");
+    return;
+  }
+
+  if(editingStudentId){
+    const index = students.findIndex(s => s.id === editingStudentId);
+    students[index] = {...students[index], firstName, lastName, className, avatar, areas};
+    toast("Schülerdaten aktualisiert.");
+  } else {
+    const id = crypto.randomUUID ? crypto.randomUUID() : `student-${Date.now()}`;
+    students.push({id, firstName, lastName, className, avatar, areas, createdAt:new Date().toISOString()});
+    currentStudentId = id;
+    localStorage.setItem(STORAGE_CURRENT, id);
+    toast("Neuer Schüler angelegt.");
+  }
+  saveStudents();
+  editingStudentId = null;
+  showPage("profile");
+}
+
+function deleteCurrentStudent(){
+  const current = getCurrent();
+  if(!current) return;
+  if(!confirm(`${fullName(current)} wirklich löschen? Alle zugehörigen Beobachtungen werden ebenfalls gelöscht.`)) return;
+  observations = observations.filter(o => o.studentId !== current.id);
+  students = students.filter(s => s.id !== current.id);
+  currentStudentId = students[0]?.id || null;
+  saveStudents(); saveObservations();
+  if(currentStudentId) localStorage.setItem(STORAGE_CURRENT, currentStudentId);
+  else localStorage.removeItem(STORAGE_CURRENT);
+  toast("Schüler wurde gelöscht.");
+  showPage("students");
+}
+
+function renderProfile(){
+  const current = getCurrent();
+  const box = document.getElementById("profileContent");
+  if(!current){
+    box.innerHTML = `<div class="card"><div class="empty">Noch kein Schüler ausgewählt.</div></div><button class="primary" onclick="openStudentForm()">＋ Ersten Schüler anlegen</button>`;
+    return;
+  }
+  const obs = observations.filter(o => o.studentId === current.id).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  const tags = current.areas?.length ? current.areas : ["Noch keine Förderbereiche"];
+  const cls = ["teal","green","orange","purple","teal"];
+  box.innerHTML = `
+    <div class="card">
+      <div class="profile"><div class="bigavatar">${current.avatar}</div><h2>${escapeHtml(fullName(current))}</h2><div class="muted small">Klasse ${escapeHtml(current.className)}</div></div>
+      <h3 style="margin-top:18px">Förderbereiche</h3>
+      <div class="tags">${tags.map((a,i)=>`<span class="tag ${cls[i%cls.length]}">${escapeHtml(a)}</span>`).join("")}</div>
+      <div class="stats"><div class="stat"><b>${obs.length}</b><span>Beobachtungen</span></div><div class="stat"><b>${obs[0] ? formatDateShort(obs[0].createdAt) : "–"}</b><span>Letzte Beobachtung</span></div></div>
+      <div class="student-actions">
+        <button class="mini" onclick="openStudentForm('${current.id}')">✏️ Bearbeiten</button>
+        <button class="mini" onclick="deleteCurrentStudent()">🗑️ Löschen</button>
+      </div>
+    </div>
+    <button class="primary" onclick="startObservation()">＋ Beobachtung aufnehmen</button>
+    <div class="card" style="margin-top:14px"><div class="row"><h3>Schülerchronik</h3><span class="small muted">Neueste zuerst</span></div>
+      <div class="timeline">
+        ${obs.length ? obs.map(o=>`<div class="event"><b>${escapeHtml(o.context || "Allgemeine Beobachtung")}</b><div class="eventmeta">${formatDate(o.createdAt)} · ${escapeHtml(o.category || "Allgemeine Beobachtung")}</div><p>${escapeHtml(o.text)}</p></div>`).join("") : `<div class="empty">Für diesen Schüler wurden noch keine Beobachtungen gespeichert.</div>`}
+      </div>
+    </div>`;
+}
+
+function startObservation(){
+  if(!getCurrent()){
+    toast("Bitte zuerst einen Schüler auswählen oder anlegen.");
+    showPage("students");
+    return;
+  }
+  document.getElementById("observationContext").value = "";
+  document.getElementById("observationCategory").value = "Allgemeine Beobachtung";
+  document.getElementById("observationText").value = "";
+  showPage("observe");
+}
+
+function prepareObservePage(){
+  const current = getCurrent();
+  document.getElementById("observeStudentInfo").textContent = current ? `Beobachtung für ${fullName(current)} · Klasse ${current.className}` : "Bitte zuerst einen Schüler auswählen.";
+}
+
+function prepareTextInput(){
+  document.getElementById("observationText").value = "";
+  showPage("review");
+}
+
+function initRecognition(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition) return false;
+  recognition = new SpeechRecognition();
+  recognition.lang = "de-DE";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    voiceListening = true;
+    document.getElementById("voiceStatus").textContent = "Aufnahme läuft … sprich jetzt.";
+    document.getElementById("voiceBtn").textContent = "Aufnahme läuft";
+  };
+
+  recognition.onresult = event => {
+    let finalText = document.getElementById("observationText").value || "";
+    let interim = "";
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      const transcript = event.results[i][0].transcript;
+      if(event.results[i].isFinal) finalText += (finalText ? " " : "") + transcript.trim();
+      else interim += transcript;
+    }
+    document.getElementById("observationText").value = finalText.trim();
+    if(interim) document.getElementById("voiceStatus").textContent = `Erkannt: ${interim}`;
+  };
+
+  recognition.onerror = event => {
+    if(event.error === "not-allowed" || event.error === "service-not-allowed"){
+      toast("Mikrofonzugriff wurde nicht erlaubt.");
+    } else if(event.error !== "aborted"){
+      document.getElementById("voiceStatus").textContent = "Die Spracherkennung wurde unterbrochen. Du kannst es erneut versuchen.";
+    }
+  };
+
+  recognition.onend = () => {
+    voiceListening = false;
+    document.getElementById("voiceBtn").textContent = "Aufnahme starten";
+    clearInterval(voiceTimer); voiceTimer = null;
+  };
+  return true;
+}
+
+function toggleVoice(){
+  if(voiceListening){ stopRecognition(false); return; }
+  if(!recognition && !initRecognition()){
+    toast("Dein Browser unterstützt die Spracherkennung hier nicht. Bitte nutze die Texteingabe.");
+    return;
+  }
+  voiceSec = 0;
+  document.getElementById("voiceTime").textContent = "00:00";
+  document.getElementById("observationText").value = "";
+  try{
+    recognition.start();
+    clearInterval(voiceTimer);
+    voiceTimer = setInterval(() => {
+      voiceSec++;
+      const min = String(Math.floor(voiceSec/60)).padStart(2,"0");
+      const sec = String(voiceSec%60).padStart(2,"0");
+      document.getElementById("voiceTime").textContent = `${min}:${sec}`;
+    },1000);
+  } catch(e){ toast("Die Aufnahme läuft bereits oder kann gerade nicht gestartet werden."); }
+}
+
+function stopRecognition(goToReview=true){
+  if(recognition && voiceListening) recognition.stop();
+  clearInterval(voiceTimer); voiceTimer = null;
+  voiceListening = false;
+  if(goToReview) showPage("review");
+}
+
+function stopVoiceAndReview(){
+  stopRecognition(true);
+}
+
+function useDemoVoice(){
+  stopRecognition(false);
+  document.getElementById("observationText").value = "Der Schüler hat heute eine Aufgabe zunächst nur zögerlich begonnen. Nach einer kurzen Hilfestellung arbeitete er zunehmend selbstständig weiter und beteiligte sich anschließend aktiv am Unterricht.";
+  document.getElementById("voiceTime").textContent = "00:18";
+  showPage("review");
+}
+
+function runAnalysis(){
+  const text = document.getElementById("observationText").value.trim();
+  if(!text){ toast("Bitte gib zuerst eine Beobachtung ein."); return; }
+  showPage("analyzing");
+  setTimeout(() => { renderCategories(); renderResults(); showPage("analysis"); }, 900);
+}
+
+function renderCategories(){
+  const category = document.getElementById("observationCategory").value;
+  const cats = [
+    ["📝", category, "gespeichert"],
+    ["📍", document.getElementById("observationContext").value || "Beobachtungssituation", "erfasst"],
+    ["📅", "Zeitpunkt", "automatisch"],
+    ["👩‍🎓", fullName(getCurrent()), "zugeordnet"]
+  ];
+  document.getElementById("categoryList").innerHTML = cats.map(c => `<div class="cat"><div class="left"><span>${c[0]}</span><b>${escapeHtml(c[1])}</b></div><span class="count">${escapeHtml(c[2])}</span></div>`).join("");
+}
+
+function renderResults(){
+  const context = document.getElementById("observationContext").value.trim() || "Keine Situation angegeben";
+  const category = document.getElementById("observationCategory").value;
+  document.getElementById("resultText").textContent = document.getElementById("observationText").value.trim();
+  document.getElementById("resultMeta").textContent = `Schüler: ${fullName(getCurrent())} · Situation: ${context} · Kategorie: ${category}`;
+}
+
+function openTab(id, el){
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  document.querySelectorAll(".tabpanel").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function saveObservation(){
+  const current = getCurrent();
+  const text = document.getElementById("observationText").value.trim();
+  if(!current || !text){ toast("Schüler oder Beobachtung fehlen."); return; }
+  const obs = {
+    id: crypto.randomUUID ? crypto.randomUUID() : `obs-${Date.now()}`,
+    studentId: current.id,
+    text,
+    context: document.getElementById("observationContext").value.trim(),
+    category: document.getElementById("observationCategory").value,
+    createdAt: new Date().toISOString()
+  };
+  observations.unshift(obs);
+  saveObservations();
+  document.getElementById("savedMessage").textContent = `Die Beobachtung wurde in der Chronik von ${fullName(current)} gespeichert.`;
+  showPage("saved");
+}
+
+function exportData(){
+  const data = {version:"3.1", exportedAt:new Date().toISOString(), students, observations};
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "paedagogischer-ki-assistent-daten.json"; a.click();
+  URL.revokeObjectURL(url);
+  toast("Datenexport wurde erstellt.");
+}
+
+function formatDate(value){
+  return new Intl.DateTimeFormat("de-DE",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value));
+}
+function formatDateShort(value){
+  return new Intl.DateTimeFormat("de-DE",{day:"2-digit",month:"2-digit"}).format(new Date(value));
+}
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+renderStudents();
+renderProfile();
+renderHome();
+</script>
+</body>
+</html>
